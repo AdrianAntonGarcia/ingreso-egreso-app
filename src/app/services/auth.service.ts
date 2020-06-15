@@ -6,6 +6,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AppState } from '../app.reducer';
 import { Store } from '@ngrx/store';
 import * as authActions from '../auth/auth.actions';
+import * as ingresoEgresoActions from '../ingreso-egreso/ingreso-egreso.actions';
 import { Subscription } from 'rxjs';
 
 @Injectable({
@@ -14,6 +15,7 @@ import { Subscription } from 'rxjs';
 export class AuthService {
 
   userSubscripcion: Subscription;
+  private _user: Usuario;
 
   constructor(public auth: AngularFireAuth,
     public firestore: AngularFirestore,
@@ -25,19 +27,25 @@ export class AuthService {
       if (fuser) {
         // Existe
         this.userSubscripcion = this.firestore.doc(`${fuser.uid}/usuario`).valueChanges().subscribe((firestoreUser: any) => {
-          console.log(firestoreUser);
           const user = Usuario.fromFirebase(firestoreUser);
+          this._user = user;
           this.store.dispatch(authActions.setUser({ user }));
         });
       } else {
         // No existe
         // console.log('Llamar unset del user')
+        this._user = null;
         this.userSubscripcion.unsubscribe();
         this.store.dispatch(authActions.unSetUser());
+        this.store.dispatch(ingresoEgresoActions.unSetItems());
       }
       // this.store.dispatch(authActions.setUser({fuser}))
 
     });
+  }
+
+  get user() {
+    return { ...this._user };
   }
 
   crearUsuario(nombre: string, email: string, password: string) {

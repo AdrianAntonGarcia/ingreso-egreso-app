@@ -1,0 +1,20 @@
+import { createReducer, on } from '@ngrx/store';
+import * as ingresoActions from './ingreso-egreso.actions';
+import { IngresoEgreso } from '../models/ingreso-egreso.model';
+
+export interface State {
+  items: IngresoEgreso[];
+}
+
+export const initialState: State = {
+  items: [],
+};
+
+const _ingresoEgresoReducer = createReducer(initialState,
+  on(ingresoActions.setItems, (state, { items }) => ({ ...state, items: [...items] })),
+  on(ingresoActions.unSetItems, (state) => ({ ...state, items: [] })),
+);
+
+export function ingresoEgresoReducer(state, action) {
+  return _ingresoEgresoReducer(state, action);
+}
